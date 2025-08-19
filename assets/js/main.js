@@ -9,6 +9,22 @@
     $head = $("head"),
     $body = $("body");
 
+  // Theme: initialize from localStorage or system preference
+  (function initializeTheme() {
+    try {
+      var savedTheme = localStorage.getItem("theme");
+      if (!savedTheme && window.matchMedia) {
+        savedTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light";
+      }
+      if (savedTheme === "dark") $body.addClass("dark");
+      else $body.removeClass("dark");
+    } catch (e) {
+      // noop
+    }
+  })();
+
   // Breakpoints.
   breakpoints({
     xlarge: ["1281px", "1680px"],
@@ -28,6 +44,28 @@
     window.setTimeout(function () {
       $body.removeClass("is-preload");
     }, 100);
+  });
+
+  // Theme toggle control
+  $(function () {
+    var isDark = $body.hasClass("dark");
+    var $toggle = $("#theme-toggle");
+    if ($toggle.length) {
+      $toggle
+        .removeClass("fa-moon fa-sun")
+        .addClass(isDark ? "fa-sun" : "fa-moon");
+      $toggle.on("click", function (event) {
+        event.preventDefault();
+        var nowDark = !$body.hasClass("dark");
+        $body.toggleClass("dark", nowDark);
+        try {
+          localStorage.setItem("theme", nowDark ? "dark" : "light");
+        } catch (e) {}
+        $(this)
+          .removeClass("fa-moon fa-sun")
+          .addClass(nowDark ? "fa-sun" : "fa-moon");
+      });
+    }
   });
 
   // ... stopped resizing.
